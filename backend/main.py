@@ -1,6 +1,30 @@
+import os
+from urllib.parse import urlparse
+
+import pymssql
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+def get_pcs_db():
+    parsed = urlparse(os.getenv('PCS_DB_URL'))
+    return pymssql.connect(
+        server=parsed.hostname,
+        user=parsed.username,
+        password=parsed.password,
+        database=parsed.path.lstrip('/'),
+        tds_version='7.3'
+    )
 
 
 @app.get("/")
